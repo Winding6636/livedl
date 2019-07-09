@@ -3,7 +3,7 @@
 	<title>{{ .title }} :: {{ .rev }}</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
 	 crossorigin="anonymous">
-	 <link rel="stylesheet" href="./style.css">
+	 <link rel="stylesheet" href="./assets/style.css">
 </header>
 
 <body>
@@ -388,9 +388,7 @@ Linkng:       Staticを選択
 					<input type="password" name="password" class="form-control" id="loginPass" title="パスワード">
 					<input type="submit" class="btn btn-success" value="ログイン">
 					</div>
-					{{if ne .ErrorMessage ""}}
-					<p>{{.ErrorMessage}}</p>
-					{{end}}
+					
 
 					<p>ニコニコセッションキー：{{ .nicosession }}</p>
 				</form>

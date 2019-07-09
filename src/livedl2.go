@@ -69,7 +69,7 @@ func loadNicoFinder() (data nicoFinder) {
 	return
 }
 
-var limit = "2019/01/20 23:59:59 JST"
+var limit = "2019/08/20 23:59:59 JST"
 
 const layout = "2006/01/02 15:04:05 MST"
 
@@ -78,6 +78,19 @@ var actionTrackID string
 
 var userSessionFile = "user-session.txt"
 var userSession string
+
+var modifiedFile = "modified.txt"
+
+func loadmodtxt() {
+	f, err := os.Open(modifiedFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+
+	fmt.Fscanln(f, &modifiedFile)
+}
 
 func main() {
 
@@ -89,7 +102,7 @@ func main() {
 
 	now := time.Now()
 	if limitTime.Unix() < now.Unix() {
-		fmt.Println("kigengire")
+		fmt.Println("有効期限が切れています。最新版を入手してください。")
 		return
 	}
 
@@ -105,11 +118,11 @@ func main() {
 		defer f.Close()
 
 		fmt.Fscanln(f, &userSession)
-	}()
+	}()/*
 	if userSession == "" {
 		fmt.Printf("%sにuser-session情報を保存して下さい", userSessionFile)
 		return
-	}
+	}*/
 
 	// nico-actiontrackid
 	func() {
@@ -208,6 +221,7 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"title":   "livedl2 α0.1",
+			"rev":	"modified.ver0.1 rev.7",
 			"limit":   limitTime.Format(layout),
 			"workers": works,
 			"working": len(works) > 0,
@@ -342,12 +356,18 @@ func main() {
 		c.Redirect(http.StatusSeeOther, "/")
 	})
 
+	r.POST("/nicologin", func(c *gin.Context) {
+		fmt.Println("まだ未実装")
+		c.Writer.WriteString(`<!DOCTYPE html><html><body><h1>まだ未実装<br><a href="/">戻る</a></h1></html>`)
+	})
+
 	r.GET("/pprof/:name", func(c *gin.Context) {
 		c.Request.Form = url.Values{}
 		c.Request.Form.Set("debug", "1")
 		name := c.Param("name")
 		pprof.Handler(name).ServeHTTP(c.Writer, c.Request)
 	})
+	r.Static("/assets", "./assets")
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
