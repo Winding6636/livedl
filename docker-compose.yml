@@ -13,5 +13,5 @@ services:
     ports:
       - "8080:8080"
     labels:
-	com.livedlweb.description: "niconico recorder fork livedl2 project"
-	maintainer "Winding.of_NKTN <Winding@kazuki.xyz>"
+        com.livedlweb.description: "niconico recorder fork livedl2 project"
+        maintainer "Winding.of_NKTN <Winding@kazuki.xyz>"
