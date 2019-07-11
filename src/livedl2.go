@@ -223,7 +223,7 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"title":   "livedl2 α0.1",
-			"rev":	"modified.ver0.1 rev.7",
+			"rev":	"modified.ver0.2 rev.13",
 			"limit":   limitTime.Format(layout),
 			"workers": works,
 			"working": len(works) > 0,
