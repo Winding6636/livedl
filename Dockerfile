@@ -1,9 +1,10 @@
-FROM golang:1.12-alpine as builder
-ENV GO111MODULE=off
+FROM golang:1.12-alpine as build
+MAINTAINER Winding.of_NKTN <Winding@kazuki.xyz>
 
 RUN apk add --no-cache \
         build-base \
         git && \
+    echo "Please wait... go get modules" && \
     go get github.com/gorilla/websocket && \
     go get golang.org/x/crypto/sha3 && \
     go get github.com/mattn/go-sqlite3 && \
@@ -16,7 +17,16 @@ RUN cd /tmp/build && \
     go build src/livedl2.go
 
 
-FROM alpine:latest 
+FROM alpine:latest
+
+WORKDIR /livedl
+
+VOLUME /livedl
+
+RUN apk add --update --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    echo "Asia/Tokyo" > /etc/timezone && \
+    apk del tzdata
 
 RUN apk add --no-cache \
         ca-certificates \
@@ -24,13 +34,8 @@ RUN apk add --no-cache \
         ffmpeg \
         openssl
 
-COPY --from=builder /tmp/build/livedl2 /usr/local/bin/
+COPY . /livedl
 
-WORKDIR /livedl
+COPY --from=build /tmp/build/livedl2 /livedl/
 
-VOLUME /livedl
-
-EXPOSE 8080
-
-CMD bash
-
+ENTRYPOINT ["/bin/sh", "-c", "/livedl/livedl2"]
