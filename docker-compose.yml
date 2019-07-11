@@ -1,0 +1,10 @@
+version: '3'
+services:
+  app:
+    build: .
+    container_name: "livedlweb_test"
+    tty: true
+    volumes:
+      - ./:./
+    ports:
+      - "8080:8080"

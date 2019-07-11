@@ -7,7 +7,7 @@ type stream struct {
 }
 type supplier struct {
 	Name    string `json:"name"`
-	PageURL string `json:"pageUrl"` // http://www.nicovideo.jp/user/XXXX
+	PageURL string `json:"pageUrl"` // https://www.nicovideo.jp/user/XXXX
 }
 type program struct {
 	NicoliveProgramID string   `json:"nicoliveProgramId"`

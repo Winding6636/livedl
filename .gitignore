@@ -1,5 +1,8 @@
-/testrec/
+#
+#Dir
 
+# Type
+*~
 *.flv
 *.mp4
 *.ts
@@ -7,22 +10,17 @@
 *.part
 *.mpg
 *.webm
-
-
-*~
-
 *.exe
 *.dll
 *.exe.config
-
 *.xml
 *.m3u8
-
 *.bin
 *.zip
 *.txt
 *.conf
 
+#DB
 *.db
 *.pem
 *.ass
