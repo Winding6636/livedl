@@ -354,7 +354,9 @@ func (w *NicoCasWork) openDB() (err error) {
 	default:
 		suffix = "sqlite3"
 	}
-	name := fmt.Sprintf("%v.%v", w.id, suffix)
+
+	const recdir = "RecData"
+	name := fmt.Sprintf("%v/%v.%v", recdir, w.id, suffix)
 
 	db, err := nicodb.Open(w.ctx, name)
 	if err != nil {

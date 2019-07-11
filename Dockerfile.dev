@@ -1,5 +1,6 @@
 FROM golang:1.12-alpine as builder
-ENV GO111MODULE=off
+
+ENV GO111MODULE=on
 
 RUN apk add --no-cache \
         build-base \
