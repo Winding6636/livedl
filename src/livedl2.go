@@ -32,7 +32,7 @@ type register struct {
 	ArchiveWait     float64 `form:"archive-wait"`
 }
 
-var defaultArchiveWait = float64(2)
+var defaultArchiveWait = float64(0)
 
 type nicoFinder struct {
 	Community []string `json:"community"`
@@ -120,11 +120,11 @@ func main() {
 		defer f.Close()
 
 		fmt.Fscanln(f, &userSession)
-	}()/*
+	}()
 	if userSession == "" {
 		fmt.Printf("%sにuser-session情報を保存して下さい", userSessionFile)
 		return
-	}*/
+	}
 
 	// nico-actiontrackid
 	func() {
