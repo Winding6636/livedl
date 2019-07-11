@@ -1,5 +1,7 @@
 FROM golang:1.12-alpine as builder
 
+ENV GO111MODULE=on
+
 RUN apk add --no-cache \
         build-base \
         git && \
@@ -19,6 +21,7 @@ FROM alpine:latest
 
 RUN apk add --no-cache \
         ca-certificates \
+        bash \
         ffmpeg \
         openssl
 
@@ -28,5 +31,7 @@ WORKDIR /livedl
 
 VOLUME /livedl
 
-CMD livedl2
+EXPOSE 8080
+
+CMD bash
 
