@@ -8,6 +8,7 @@ services:
       - GIN_MODE=release
     volumes:
       - ./user-session.txt:/livedl/user-session.txt
+      - ./nico-finder-setting.txt:/livedl/nico-finder-setting.txt
       - ./RecData:/livedl/RecData
     working_dir: /livedl
     ports:
