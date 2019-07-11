@@ -1,3 +1,4 @@
+[forkReadme](/forkReadme.md)
 # livedl2 αバージョン
 
 次期バージョンとなる予定のlivedl2の実験的機能評価用バージョンです。
