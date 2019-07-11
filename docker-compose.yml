@@ -3,9 +3,15 @@ services:
   livedlweb:
     build: .
     container_name: "livedlweb_test"
-    tty: true
+    restart: always
+    environment:
+      - GIN_MODE=release
     volumes:
+      - ./user-session.txt:/livedl/user-session.txt
       - ./RecData:/livedl/RecData
     working_dir: /livedl
     ports:
       - "8080:8080"
+    labels:
+	com.livedlweb.description: "niconico recorder fork livedl2 project"
+	maintainer "Winding.of_NKTN <Winding@kazuki.xyz>"

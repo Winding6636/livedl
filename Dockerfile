@@ -4,11 +4,12 @@ MAINTAINER Winding.of_NKTN <Winding@kazuki.xyz>
 RUN apk add --no-cache \
         build-base \
         git && \
-    go get github.com/gorilla/websocket && \
-    go get golang.org/x/crypto/sha3 && \
-    go get github.com/mattn/go-sqlite3 && \
-    go get github.com/gin-gonic/gin && \
-    go get github.com/himananiito/m3u8
+    echo "Please wait... go get modules" && \
+    go get github.com/gorilla/websocket \
+	golang.org/x/crypto/sha3 \
+	github.com/mattn/go-sqlite3 \
+	github.com/gin-gonic/gin \
+	github.com/himananiito/m3u8
 
 COPY . /tmp/build
 
@@ -16,7 +17,7 @@ RUN cd /tmp/build && \
     go build src/livedl2.go
 
 
-FROM alpine:latest 
+FROM alpine:latest
 
 WORKDIR /livedl
 
@@ -36,5 +37,7 @@ RUN apk add --no-cache \
 COPY . /livedl
 
 COPY --from=build /tmp/build/livedl2 /livedl/
+
+EXPOSE 8080
 
 ENTRYPOINT ["/bin/sh", "-c", "/livedl/livedl2"]
