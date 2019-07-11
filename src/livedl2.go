@@ -81,6 +81,8 @@ var userSession string
 
 var modifiedFile = "modified.txt"
 
+const recdir = "RecData"
+
 func loadmodtxt() {
 	f, err := os.Open(modifiedFile)
 	if err != nil {

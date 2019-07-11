@@ -46,7 +46,7 @@ func Launch(num int) (q chan HttpWork) {
 	var m sync.Mutex
 
 	requestPerSec := 6.0                // [リクエスト数/秒] 超える場合に一定期間Sleepする
-	sleepTime := 500 * time.Millisecond // Sleep時間
+	sleepTime := 100 * time.Millisecond // Sleep時間
 	arrSize := 5                        // サンプル数
 
 	arr := make([]int64, 0, arrSize)

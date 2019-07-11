@@ -237,7 +237,8 @@ func NewHls(opt options.Option, prop map[string]interface{}) (hls *NicoHls, err 
 	if timeshift {
 		dbName = dbName + "(TS)"
 	}
-	dbName = dbName + ".sqlite3"
+	//RecData
+	dbName = "./RecData/" + dbName + ".sqlite3"
 
 	files.MkdirByFileName(dbName)
 
