@@ -23,6 +23,7 @@
 *.zip
 *.txt
 *.conf
+*.log
 
 #DB
 *.db
@@ -33,6 +34,12 @@
 *-journal
 *.sqlite3-shm
 *.sqlite3-wal
+
+#Binary
+livedl
+livedl2
+livedl.exe
+livedl2.exe
 
 !changelog.txt
 !.gitkeep

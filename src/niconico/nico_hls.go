@@ -49,6 +49,7 @@ type playlist struct {
 	position float64
 }
 type NicoHls struct {
+	wsapi int
 	startDelay int
 	playlist playlist
 
@@ -123,6 +124,12 @@ func NewHls(opt options.Option, prop map[string]interface{}) (hls *NicoHls, err 
 		return
 	}
 
+	wsapi := 2
+	if m := regexp.MustCompile(`/wsapi/v1/`).FindStringSubmatch(webSocketUrl); len(m) > 0 {
+		wsapi = 1
+		log.Println("wsapi: 1")
+	}
+	
 	myUserId, _ := prop["//myId"].(string)
 	if myUserId == "" {
 		myUserId = "NaN"
@@ -133,6 +140,14 @@ func NewHls(opt options.Option, prop map[string]interface{}) (hls *NicoHls, err 
 		timeshift = true
 	}
 
+	if wsapi == 2 && false && ! timeshift {
+		if m := regexp.MustCompile(`/watch/([^?]+)`).FindStringSubmatch(webSocketUrl); len(m) > 0 {
+			broadcastId = m[1]
+		}
+		webSocketUrl = strings.Replace(webSocketUrl, "/wsapi/v2/", "/wsapi/v1/", 1)
+		wsapi = 1
+		log.Println("wsapi: 1")
+	}
 
 
 	var pid string
@@ -243,6 +258,7 @@ func NewHls(opt options.Option, prop map[string]interface{}) (hls *NicoHls, err 
 	files.MkdirByFileName(dbName)
 
 	hls = &NicoHls{
+		wsapi: wsapi,
 		broadcastId: broadcastId,
 		webSocketUrl: webSocketUrl,
 		myUserId: myUserId,
@@ -1499,6 +1515,11 @@ func (hls *NicoHls) startPlaylist(uri string) {
 }
 func (hls *NicoHls) startMain() {
 
+	if hls.wsapi == 1 {
+		hls.startMainV1()
+		return
+	}
+	
 	// エラー時はMAIN_*を返すこと
 	hls.startPGoroutine(func(sig <-chan struct{}) int {
 		if hls.nicoDebug {
@@ -1553,13 +1574,19 @@ func (hls *NicoHls) startMain() {
 		})
 
 		err = writeJson(OBJ{
-			"type": "watch",
+			/*"type": "watch",
 			"body": OBJ{
 				"command": "playerversion",
 				"params": []string{
-					"leo",
+					"leo",*/
+			"type": "startWatching",
+			"data": OBJ{
+				"stream": OBJ{
+					"quality": hls.quality,
+					"protocol": "hls",
+					"latency": "high",
 				},
-			},
+			/*},
 		})
 		if err != nil {
 			if (! hls.interrupted()) {
@@ -1584,8 +1611,12 @@ func (hls *NicoHls) startMain() {
 						"priorStreamQuality": hls.quality, //"abr", // high
 						"protocol": "hls",
 						"requireNewStream": true,
-					},
+					},*/
+				"room": OBJ{
+					"protocol": "webSocket",
+					"commentable": true,
 				},
+				"reconnect": true,
 			},
 		})
 		if err != nil {
@@ -1622,15 +1653,21 @@ func (hls *NicoHls) startMain() {
 				continue
 			}
 			switch _type {
-			case "watch":
+			/*case "watch":
 				if cmd, ok := objs.FindString(res, "body", "command"); ok {
-					switch cmd {
-					case "watchinginterval":
-						if arr, ok := objs.FindArray(res, "body", "params"); ok {
+					switch cmd {*/
+					//case "watchinginterval":
+					case "seat":
+						//if arr, ok := objs.FindArray(res, "body", "params"); ok {
+						if _arr, ok := objs.FindFloat64(res, "data", "keepIntervalSec"); ok {
+							arr := []interface{}{ _arr }
 							for _, intf := range arr {
-								if str, ok := intf.(string); ok {
-									num, e := strconv.Atoi(str)
-									if e == nil && num > 0 {
+								//if str, ok := intf.(string); ok {
+									if str, ok := intf.(float64); ok {
+									//num, e := strconv.Atoi(str)
+									num := int(str)
+									//if e == nil && num > 0 {
+									if num > 0 {
 										//hls.SetInterval(num)
 										watchinginterval = num
 										break
@@ -1646,7 +1683,7 @@ func (hls *NicoHls) startMain() {
 									select {
 									case <-time.After(time.Duration(watchinginterval) * time.Second):
 										err := writeJson(OBJ{
-											"type": "watch",
+											/*"type": "watch",
 											"body": OBJ{
 												"command": "watching",
 												"params": []string{
@@ -1654,7 +1691,8 @@ func (hls *NicoHls) startMain() {
 													"-1",
 													"0",
 												},
-											},
+											},*/
+											"type": "keepSeat",
 										})
 										if err != nil {
 											if (! hls.interrupted()) {
@@ -1669,8 +1707,10 @@ func (hls *NicoHls) startMain() {
 							})
 						}
 
-					case "currentstream":
-						if uri, ok := objs.FindString(res, "body", "currentStream", "uri"); ok {
+					//case "currentstream":
+					case "stream":
+						//if uri, ok := objs.FindString(res, "body", "currentStream", "uri"); ok {
+						if uri, ok := objs.FindString(res, "data", "uri"); ok {
 							if (! playlistStarted) && uri != "" {
 								playlistStarted = true
 								hls.startPlaylist(uri)
@@ -1679,7 +1719,9 @@ func (hls *NicoHls) startMain() {
 
 					case "disconnect":
 						// print params
-						if arr, ok := objs.FindArray(res, "body", "params"); ok {
+						//if arr, ok := objs.FindArray(res, "body", "params"); ok {
+						if _arr, ok := objs.FindArray(res, "data", "reason"); ok {
+							arr := []interface{}{ 0, _arr }
 							fmt.Printf("%v\n", arr)
 							if len(arr) >= 2 {
 								if s, ok := arr[1].(string); ok {
@@ -1698,13 +1740,16 @@ func (hls *NicoHls) startMain() {
 						}
 						return MAIN_DISCONNECT
 
-					case "currentroom":
+					//case "currentroom":
+					case "room":
 						// comment
-						messageServerUri, ok := objs.FindString(res, "body", "room", "messageServerUri")
+						//messageServerUri, ok := objs.FindString(res, "body", "room", "messageServerUri")
+						messageServerUri, ok := objs.FindString(res, "data", "messageServer", "Uri")
 						if !ok {
 							break
 						}
-						threadId, ok := objs.FindString(res, "body", "room", "threadId")
+						//threadId, ok := objs.FindString(res, "body", "room", "threadId")
+						threadId, ok := objs.FindString(res, "data", "threadId")
 						if !ok {
 							break
 						}
@@ -1712,19 +1757,20 @@ func (hls *NicoHls) startMain() {
 
 					case "statistics":
 					case "permit":
-					case "servertime":
+					//case "servertime":
+					case "serverTime":
 					case "schedule":
 						// nop
-					default:
+					/*default:
 						fmt.Printf("%#v\n", res)
 						fmt.Printf("unknown command: %s\n", cmd)
 					} // end switch "command"
-				}
+				}*/
 
 			case "ping":
 				err := writeJson(OBJ{
 					"type": "pong",
-					"body": OBJ{},
+					//"body": OBJ{},
 				})
 				if err != nil {
 					if (! hls.interrupted()) {
@@ -1733,7 +1779,8 @@ func (hls *NicoHls) startMain() {
 					return NETWORK_ERROR
 				}
 			case "error":
-				code, ok := objs.FindString(res, "body", "code")
+				//code, ok := objs.FindString(res, "body", "code")
+				code, ok := objs.FindString(res, "data", "code")
 				if (! ok) {
 					log.Printf("Unknown error: %#v\n", res)
 					return ERROR_SHUTDOWN
@@ -1787,6 +1834,10 @@ func (hls *NicoHls) startMain() {
 		} // for ReadJSON
 		return OK
 	})
+}
+
+func (hls *NicoHls) startMainV1() {
+	return //old startMain
 }
 
 func (hls *NicoHls) serve(hlsPort int) {
