@@ -1,3 +1,7 @@
+#vscode
+.vscode/
+.history/
+
 #
 #Dir
 
@@ -32,3 +36,5 @@
 
 !changelog.txt
 !.gitkeep
+
+RecData/
